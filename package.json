@@ -1,0 +1,30 @@
+{
+  "name": "dokku-sdk",
+  "version": "1.0.0",
+  "description": "A TypeScript SDK for interacting with Dokku over SSH.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "node-ssh": "^13.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2",
+    "@types/node": "^22.13.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akhil-naidu/dokku-sdk.git"
+  },
+  "keywords": [
+    "dokku",
+    "ssh",
+    "sdk",
+    "typescript"
+  ],
+  "author": "Akhil Naidu",
+  "license": "MIT"
+}

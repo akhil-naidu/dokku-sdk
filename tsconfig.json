@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", // Modern JavaScript target
+    "module": "NodeNext", // Ensure compatibility with ESM
+    "moduleResolution": "NodeNext", // Correct resolution for ESM
+    "strict": true, // Enable all strict type-checking
+    "skipLibCheck": true, // Skip checking declaration files
+    "outDir": "dist", // Output compiled JS here
+    "rootDir": ".", // Root of the project
+    "esModuleInterop": true, // Enable interop between ESM and CJS
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true, // Allow default imports from modules
+    "noImplicitAny": true, // Enforce strict typing
+    "resolveJsonModule": true, // Allow importing JSON files
+    "sourceMap": true, // Enable source maps for debugging
+    "declaration": true, // Generate type declaration files
+    "strictPropertyInitialization": false // Useful for class constructors
+  },
+  "include": ["./**/*.ts"], // Include all TypeScript files
+  "exclude": ["node_modules", "dist"] // Exclude build artifacts
+}
