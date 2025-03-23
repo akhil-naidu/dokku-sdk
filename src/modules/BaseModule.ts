@@ -1,53 +1,60 @@
-import {
-  NodeSSH,
-  SSHExecCommandOptions,
-  SSHExecCommandResponse,
-} from 'node-ssh';
+// src/modules/BaseModule.ts
+import { NodeSSH } from 'node-ssh';
+import Queue from 'better-queue';
 
-export interface SSHConfig {
+export type SSHConfig = {
   host: string;
   username: string;
-  privateKey?: string;
-  password?: string;
-}
+  privateKey: string;
+  port?: number; // Optional SSH port (default: 22)
+};
 
-export class BaseModule {
+export abstract class BaseModule {
   protected ssh: NodeSSH;
-  private connected = false;
+  protected queue: Queue<() => Promise<unknown>, unknown>;
 
-  constructor(private config: SSHConfig) {
-    this.ssh = new NodeSSH();
+  constructor(ssh: NodeSSH, queue: Queue<() => Promise<unknown>, unknown>) {
+    this.ssh = ssh;
+    this.queue = queue;
   }
 
-  // Establish SSH Connection
-  async connect() {
-    if (this.connected) return;
-    await this.ssh.connect(this.config);
-    this.connected = true;
-  }
-
-  // Execute Commands (Returns stdout)
   protected async execute(command: string): Promise<string> {
-    if (!this.connected) await this.connect();
-    const result = await this.ssh.execCommand(command);
-    if (result.stderr) throw new Error(result.stderr);
-    return result.stdout.trim();
+    return new Promise<string>((resolve, reject) => {
+      this.queue.push(
+        async () => {
+          if (!this.ssh.isConnected()) {
+            throw new Error('SSH connection is not established.');
+          }
+          const result = await this.ssh.execCommand(command);
+          if (result.stderr) throw new Error(result.stderr);
+          return result.stdout.trim();
+        },
+        (err, result) => (err ? reject(err) : resolve(result as string)),
+      );
+    });
   }
 
-  // Stream Long-running Commands
-  protected async stream(command: string, onData: (data: string) => void) {
-    if (!this.connected) await this.connect();
-    return this.ssh.exec(command, [], {
-      stream: 'both',
-      onStdout: (chunk) => onData(chunk.toString()),
-      onStderr: (chunk) => onData(chunk.toString()),
-    } as SSHExecCommandOptions);
-  }
+  protected async stream(
+    command: string,
+    onData: (data: string) => void,
+  ): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.queue.push(
+        async () => {
+          if (!this.ssh.isConnected()) {
+            throw new Error('SSH connection is not established.');
+          }
 
-  async disconnect() {
-    if (this.connected) {
-      this.ssh.dispose();
-      this.connected = false;
-    }
+          this.ssh.exec(command, [], {
+            stream: 'both',
+            onStdout: (chunk) => onData(chunk.toString()),
+            onStderr: (chunk) => onData(chunk.toString()),
+          });
+
+          return new Promise<void>((res) => setTimeout(res, 5000)); // Keep stream alive
+        },
+        (err) => (err ? reject(err) : resolve()),
+      );
+    });
   }
 }

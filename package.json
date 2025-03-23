@@ -9,11 +9,13 @@
     "prepare": "npm run build"
   },
   "dependencies": {
+    "@types/better-queue": "^3.8.6",
+    "better-queue": "^3.8.12",
     "node-ssh": "^13.2.0"
   },
   "devDependencies": {
-    "typescript": "^5.8.2",
-    "@types/node": "^22.13.10"
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
   },
   "repository": {
     "type": "git",

@@ -1,25 +1,30 @@
-import { DokkuSDK } from '../src';
+// import { Dokku, SSHConfig } from 'dokku-sdk';
+import { Dokku, SSHConfig } from '../src';
 
-const dokku = new DokkuSDK({
-  host: 'your.dokku.server',
-  username: 'dokku-user',
-  privateKey: '/path/to/id_rsa',
-});
+// Initialize the SDK with SSH credentials
+const sshConfig: SSHConfig = {
+  host: 'your-dokku-server',
+  username: 'dokku',
+  privateKey: '/path/to/private/key',
+};
+
+const dokku = new Dokku(sshConfig);
 
 async function main() {
   try {
-    // List apps
-    console.log('📦 Apps:', await dokku.apps.list());
+    await dokku.connect();
 
-    // Create app
-    await dokku.apps.create('my-test-app');
-    console.log('🚀 Created app: my-test-app');
+    // Create a new Dokku app
+    await dokku.apps.create('my-new-app');
+    console.log('✅ App created!');
 
-    // Stream logs
-    console.log('📄 Streaming logs:');
-    await dokku.logs.stream('my-test-app', (log) => {
-      process.stdout.write(log);
-    });
+    // List all Dokku apps
+    const appList = await dokku.apps.list();
+    console.log('📦 Current Apps:', appList);
+
+    // Stream app logs in real-time
+    console.log('📊 Streaming logs:');
+    await dokku.logs.stream('my-new-app', (data) => process.stdout.write(data));
   } catch (error) {
     console.error('❌ Error:', error);
   } finally {

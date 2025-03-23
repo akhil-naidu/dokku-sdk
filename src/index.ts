@@ -1,2 +1,2 @@
-export { DokkuSDK } from './DokkuSDK';
+export { Dokku } from './Dokku';
 export type { SSHConfig } from './modules/BaseModule';
